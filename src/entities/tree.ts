@@ -1,5 +1,5 @@
 import { createCanvas, CanvasRenderingContext2D } from 'canvas';
-import { spawn } from 'child_process';
+import { spawn, type ChildProcessWithoutNullStreams } from 'child_process';
 import { createHash, randomBytes } from 'crypto';
 import * as fs from 'fs';
 import { SeededRandom } from '../core/seeded-random';
@@ -7,6 +7,7 @@ import type { Color } from '../types/color';
 import { DEFAULT_CONFIG, type Config } from '../types/config';
 import type { Generate } from '../models/generate';
 import type { GeneratorResult } from '../types/generator-result';
+import type { Context } from 'baojs';
 
 
 export class Tree implements Generate {
@@ -39,8 +40,8 @@ export class Tree implements Generate {
             trunkStartPosition: { x: offsetX, y: offsetY }
         });
     }
-    
-    async generate(CONFIG: Config = DEFAULT_CONFIG): Promise<GeneratorResult> {
+
+    async generate(con: Context, onStream?:(process:ChildProcessWithoutNullStreams,videoStream:ChildProcessWithoutNullStreams['stdout']) => void, CONFIG: Config = DEFAULT_CONFIG): Promise<GeneratorResult> {
         console.log("Generating Tree");
 
         const canvas = createCanvas(CONFIG.width, CONFIG.height);
@@ -166,12 +167,12 @@ export class Tree implements Generate {
                 }
                 ctx.globalAlpha = prevAlpha;
             }
-            
+
             const finalBuffer = canvas.toBuffer('image/png');
-            if(CONFIG.save_as_file){
+            if (CONFIG.save_as_file) {
                 fs.writeFileSync(CONFIG.imageFilename, finalBuffer);
             }
-            
+
             console.log(`\n✅ Image generation complete!`);
             console.log(`   Image saved: ${CONFIG.imageFilename}`);
             return {
@@ -182,7 +183,7 @@ export class Tree implements Generate {
         }
 
 
-        // Generate both video and final image
+        // Generate video only
         const ffmpegArgs = [
             '-y',
             '-f', 'image2pipe',
@@ -191,20 +192,27 @@ export class Tree implements Generate {
             '-c:v', 'libvpx-vp9',
             '-b:v', '4M',
             '-pix_fmt', 'yuva420p',
-            '-auto-alt-ref', '0',
-            CONFIG.filename
+            '-auto-alt-ref', '0'
         ];
+
+        // output decision
+        if (CONFIG.save_as_file) {
+            ffmpegArgs.push(CONFIG.filename);
+        } else {
+            ffmpegArgs.push(
+                '-f', 'webm',
+                'pipe:1'
+            );
+        }
+
 
         console.log(`🎥 Spawning FFmpeg process: ${CONFIG.filename}`);
         const ffmpeg = spawn('ffmpeg', ffmpegArgs);
-        ffmpeg.stderr.on('data', () => { });
 
-        ffmpeg.on('close', (code) => {
-            console.log(`✅ Video generation complete!`);
-            console.log(`FILES CREATED:`);
-            console.log(`   1. Video: ${CONFIG.filename}`);
-            console.log(`   2. Image: ${CONFIG.imageFilename}`);
-        });
+        if (onStream) {
+            onStream(ffmpeg, ffmpeg.stdout);
+        }
+
 
         // --- RENDER LOOP ---
         const totalFrames = CONFIG.durationSeconds * CONFIG.fps;
@@ -307,24 +315,15 @@ export class Tree implements Generate {
             const buffer = canvas.toBuffer('image/png');
             const ok = ffmpeg.stdin.write(buffer);
             if (!ok) await new Promise(resolve => ffmpeg.stdin.once('drain', resolve));
-            if (frame % 30 === 0) {
-                const pct = Math.round((frame / totalFrames) * 100);
-                process.stdout.write(`\rProgress: ${pct}%`);
-            }
-        }
-
-
-        console.log("\n📸 Saving final tree snapshot...");
-        const finalBuffer = canvas.toBuffer('image/png');
-        if(CONFIG.save_as_file){
-             fs.writeFileSync(CONFIG.imageFilename, finalBuffer);
+            // if (frame % 30 === 0) {
+            //     const pct = Math.round((frame / totalFrames) * 100);
+            //     console.log('progress:', pct + '%');
+            // }
         }
         ffmpeg.stdin.end();
 
         return {
             videoPath: CONFIG.filename,
-            imagePath: CONFIG.save_as_file ? CONFIG.imageFilename : undefined,
-            imageBuffer: finalBuffer,
             trunkStartPosition: { x: offsetX, y: offsetY }
         };
     }

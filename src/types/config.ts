@@ -14,8 +14,8 @@ export type Config = {
 }
 export const DEFAULT_CONFIG: Config = {
     photoOnly: true,
-    width: 1080, 
-    height: 1080,
+    width: 480, 
+    height: 480,
     fps: 30, 
     durationSeconds: 30, 
     seed: randomBytes(16).toString('hex'), // Random seed for unique tree", 
