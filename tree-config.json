@@ -31,7 +31,13 @@
 
        { "imagePath": "samples/lavender1.png", "gridX": 2, "gridY": 6, "scale": 0.4, "trunkStartPosition": {"x":540,"y":1000} },
 
-       { "imagePath": "samples/lavender2.png", "gridX": 3, "gridY": 6, "scale": 0.4, "trunkStartPosition": {"x":540,"y":1000} }
+       { "imagePath": "samples/lavender2.png", "gridX": 3, "gridY": 6, "scale": 0.4, "trunkStartPosition": {"x":540,"y":1000} },
+
+       { "imagePath": "samples/lavender2.png", "gridX": 3, "gridY": 6, "scale": 0.4, "trunkStartPosition": {"x":540,"y":1000} },
+
+       { "imagePath": "samples/sunflower1.png", "gridX": 6, "gridY": 6, "scale": 0.4, "trunkStartPosition": {"x":540,"y":1000} },
+
+       { "imagePath": "samples/sunflower2.png", "gridX": 6, "gridY": 7, "scale": 0.4, "trunkStartPosition": {"x":540,"y":1000} }
 
    ]
 }
