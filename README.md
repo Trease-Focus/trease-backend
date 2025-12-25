@@ -1,22 +1,22 @@
 <p align="center">
-  <img src="samples/isometric_grid_with_trees.png" alt="Forease - Your Digital Forest" width="600"/>
+  <img src="samples/isometric_grid_with_trees.png" alt="Trease - Your Focus Forest" width="600"/>
 </p>
 
-<h1 align="center">Forease</h1>
+<h1 align="center">Trease</h1>
 
 <p align="center">
-  <em>Grow your focus, one tree at a time</em>
+  <em>Cultivate attention.</em>
 </p>
 
 <p align="center">
-  <strong>An open-source backend for Forease Focus</strong><br/>
+  <strong>An open-source backend for Trease Focus</strong><br/>
   <sub>A free alternative to Forest App 🌲</sub>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
   <img src="https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white" alt="Bun"/>
-  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License"/>
+  <img src="https://img.shields.io/badge/License-GNU-green?style=for-the-badge" alt="GNU License"/>
 </p>
 
 <br/>
@@ -29,10 +29,6 @@
 
 🎨 **Procedurally Generated Flora** — Every plant is unique, grown from seeds  
 🎬 **Real-time Video Generation** — Watch your trees grow with animated videos  
-🖼️ **High-Quality Images** — Beautiful PNG exports at any resolution  
-🌸 **9 Unique Plant Species** — From cherry blossoms to weeping willows  
-⚡ **Lightning Fast** — Powered by Bun runtime  
-🔧 **Simple REST API** — Easy integration with any frontend  
 
 <br/>
 
@@ -43,7 +39,7 @@
 ## 🌸 The Garden Collection
 
 <p align="center">
-  <em>Every focus session grows something beautiful</em>
+  <em>Every focus session grows something beautiful. (More to be added)</em>
 </p>
 
 <br/>
@@ -110,8 +106,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/forease-focus/forease-backend.git
-cd forease-backend
+git clone https://github.com/trease-focus/trease-backend.git
+cd trease-backend
 
 # Install dependencies
 bun install
@@ -146,6 +142,18 @@ GET /image?type={plant}&seed={seed}
 <br/>
 
 ### Generate Video
+
+```http
+GET /video?type={plant}&seed={seed}
+```
+
+<p align="center">
+    <video width="400" controls>
+        <source src="samples/tree_growth.webm" type="video/webm">
+        Your browser does not support the video tag.
+    </video>
+</p>
+
 
 ```http
 GET /video?type={plant}&seed={seed}
@@ -271,5 +279,5 @@ Distributed under the GNU GENERAL PUBLIC LICENSE Version 3. See `LICENSE` for mo
 <br/>
 
 <p align="center">
-  <a href="#-forease">⬆️ Back to Top</a>
+  <a href="#-trease">⬆️ Back to Top</a>
 </p>
