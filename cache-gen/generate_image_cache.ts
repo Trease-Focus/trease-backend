@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, copyFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import { entities } from '../src/entities';
@@ -75,6 +75,7 @@ export class SingleGridGenerator {
                 const result = await generator.generate(null as any, undefined, entityConfig);
 
                 if (result.imagePath) {
+                    await copyFile(result.imagePath, path.join(this.outputDir, `${entityName}.png`));
                     await this.generateSingleGrid(entityName, result.imagePath);
                 } else if (result.imageBuffer) {
                     const tempPath = path.join(this.outputDir, `${entityName}.png`);

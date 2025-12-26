@@ -8,6 +8,7 @@ import type { Generate } from '../models/generate';
 import type { GeneratorResult } from '../types/generator-result';
 import type { Context } from 'baojs';
 import { getFFmpegArgs } from '../core/ffmpeg-args';
+import { buffer } from 'stream/consumers';
 
 class Vector2 { constructor(public x: number, public y: number) {} }
 
