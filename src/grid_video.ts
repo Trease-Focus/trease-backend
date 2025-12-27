@@ -212,13 +212,13 @@ function spawnFFmpeg(args: string[]): Promise<void> {
 }
 
 export async function generateGridVideo(
-  cedarPngPath: string,
-  cedarWebmPath: string,
+  treePngPath: string,
+  treeWebmPath: string,
   outputPath: string,
   treeScale: number = 0.5
 ): Promise<void> {
   console.log('Loading cedar.png for anchor calculation...');
-  const anchorImage = await loadImage(cedarPngPath);
+  const anchorImage = await loadImage(treePngPath);
   const offsets = detectTreeContentPosition(anchorImage);
   console.log(`Detected offsets - xOffset: ${offsets.xOffset.toFixed(1)}px, yPadding: ${offsets.yPadding}px, contentWidth: ${offsets.contentWidth}px`);
 
@@ -265,16 +265,18 @@ export async function generateGridVideo(
   console.log('Compositing video with ffmpeg...');
   
   // FFmpeg command to overlay cedar.webm on base grid
-  // Loop the static grid image to match the video duration
+// Loop the static grid image to match the video duration
 const ffmpegArgs = [
     '-loop', '1',                 // Loop the base grid image
     '-i', baseGridPath,           // Base grid image
     '-c:v', 'libvpx-vp9',         // Decode with VP9
-    '-i', cedarWebmPath,          // Cedar video (transparent)
+    '-i', treeWebmPath,          // Cedar video (transparent)
     '-filter_complex',
+    `color=c=#C7C3BC:s=${DEFAULT_CONFIG.canvasWidth}x${DEFAULT_CONFIG.canvasHeight}:r=${DEFAULT_CONFIG.fps}[bg];` +
     `[1:v]scale=${Math.round(drawWidth)}:${Math.round(drawHeight)}:flags=lanczos,format=yuva420p[scaled];` +
     `[0:v]format=yuva420p[base];` +
-    `[base][scaled]overlay=${Math.round(treeX)}:${Math.round(treeY)}:shortest=1:format=auto[out]`,
+    `[bg][base]overlay=0:0:shortest=1[withgrid];` +
+    `[withgrid][scaled]overlay=${Math.round(treeX)}:${Math.round(treeY)}:shortest=1[out]`,
     '-map', '[out]',
     '-c:v', 'libvpx-vp9',         // VP9 codec for webm
     '-b:v', '0',                  // Variable bitrate mode
@@ -282,9 +284,8 @@ const ffmpegArgs = [
     '-deadline', 'realtime',      // Fastest encoding
     '-cpu-used', '8',             // Max speed (0-8, higher = faster)
     '-row-mt', '1',               // Enable row-based multithreading
-    '-auto-alt-ref', '0',         // Required for alpha channel
     '-r', String(DEFAULT_CONFIG.fps),
-    '-pix_fmt', 'yuva420p',       // Pixel format for transparency
+    '-pix_fmt', 'yuv420p',        // Pixel format without transparency
     '-y',                         // Overwrite output
     outputPath
 ];

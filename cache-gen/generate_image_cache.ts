@@ -73,22 +73,14 @@ export class SingleGridGenerator {
 
             try {
                 const result = await generator.generate(null as any, undefined, entityConfig);
+                const tempPath = path.join(this.outputDir, `${entityName}.png`);
 
                 if (result.imagePath) {
-                    await copyFile(result.imagePath, path.join(this.outputDir, `${entityName}.png`));
+                    await copyFile(result.imagePath, tempPath);
                     await this.generateSingleGrid(entityName, result.imagePath);
                 } else if (result.imageBuffer) {
-                    const tempPath = path.join(this.outputDir, `${entityName}.png`);
                     await writeFile(tempPath, result.imageBuffer);
                     await this.generateSingleGrid(entityName, tempPath);
-                } else {
-                    const samplePath = path.join(__dirname, '..', 'samples', `${entityName}.png`);
-                    if (existsSync(samplePath)) {
-                        console.log(`  ℹ Using existing sample: ${samplePath}`);
-                        await this.generateSingleGrid(entityName, samplePath);
-                    } else {
-                        console.error(`  ✗ No image available for ${entityName}`);
-                    }
                 }
             } catch (error) {
                 console.error(`  ✗ Error generating ${entityName}:`, error);
@@ -137,21 +129,15 @@ export class SingleGridGenerator {
 
         try {
             const result = await generator.generate(null as any, undefined, entityConfig);
+            const tempPath = path.join(this.outputDir, `${entityName}.png`);
 
             if (result.imagePath) {
+                await copyFile(result.imagePath, tempPath);
                 await this.generateSingleGrid(entityName, result.imagePath);
             } else if (result.imageBuffer) {
                 const tempPath = path.join(this.outputDir, `${entityName}.png`);
                 await writeFile(tempPath, result.imageBuffer);
                 await this.generateSingleGrid(entityName, tempPath);
-            } else {
-                const samplePath = path.join(__dirname, '..', 'samples', `${entityName}.png`);
-                if (existsSync(samplePath)) {
-                    console.log(`  ℹ Using existing sample: ${samplePath}`);
-                    await this.generateSingleGrid(entityName, samplePath);
-                } else {
-                    console.error(`  ✗ No image available for ${entityName}`);
-                }
             }
         } catch (error) {
             console.error(`  ✗ Error generating ${entityName}:`, error);

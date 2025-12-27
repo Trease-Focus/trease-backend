@@ -1,11 +1,14 @@
-import { mkdir, copyFile } from 'fs/promises';
+import { mkdir, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import { entities } from '../src/entities';
 import type { Config } from '../src/types/config';
+import { generateGridVideo } from '../src/grid_video';
 
 const SEED = '6969696969696969';
 const OUTPUT_DIR = path.join(__dirname, '..', 'cache', 'video');
+const IMAGES_DIR = path.join(__dirname, '..', 'cache', 'images');
+const TREE_SCALE = 0.8;
 
 /**
  * VideoGenerator - Generates videos for each entity
@@ -56,9 +59,18 @@ export class VideoGenerator {
                 const result = await generator.generate(null as any, undefined, entityConfig);
 
                 if (result.videoPath) {
-                    const outputPath = path.join(this.outputDir, `${entityName}.webm`);
-                    await copyFile(result.videoPath, outputPath);
-                    console.log(`  ✓ Saved video: ${outputPath}`);
+                    const treePngPath = path.join(IMAGES_DIR, `${entityName}.png`);
+                    const gridOutputPath = path.join(this.outputDir, `${entityName}.webm`);
+                    
+                    console.log(`  🎬 Generating grid video...`);
+                    await generateGridVideo(treePngPath, result.videoPath, gridOutputPath, TREE_SCALE);
+                    console.log(`  ✓ Saved grid video: ${gridOutputPath}`);
+                    
+                    // Delete the original non-grid video
+                    if (existsSync(result.videoPath)) {
+                        await unlink(result.videoPath);
+                        console.log(`  🗑️ Deleted temp video: ${result.videoPath}`);
+                    }
                 } else {
                     console.error(`  ✗ No video generated for ${entityName}`);
                 }
@@ -105,9 +117,18 @@ export class VideoGenerator {
             const result = await generator.generate(null as any, undefined, entityConfig);
 
             if (result.videoPath) {
-                const outputPath = path.join(this.outputDir, `${entityName}.webm`);
-                await copyFile(result.videoPath, outputPath);
-                console.log(`  ✓ Saved video: ${outputPath}`);
+                const treePngPath = path.join(IMAGES_DIR, `${entityName}.png`);
+                const gridOutputPath = path.join(this.outputDir, `${entityName}.webm`);
+                
+                console.log(`  🎬 Generating grid video...`);
+                await generateGridVideo(treePngPath, result.videoPath, gridOutputPath, TREE_SCALE);
+                console.log(`  ✓ Saved grid video: ${gridOutputPath}`);
+                
+                // Delete the original non-grid video
+                if (existsSync(result.videoPath)) {
+                    await unlink(result.videoPath);
+                    console.log(`  🗑️ Deleted temp video: ${result.videoPath}`);
+                }
             } else {
                 console.error(`  ✗ No video generated for ${entityName}`);
             }
