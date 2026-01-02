@@ -47,7 +47,8 @@ export class SingleGridGenerator {
 
         await generateGrid({
             trees: [treeConfig],
-            outputFilename: outputPath
+            outputFilename: outputPath,
+            filter: 'winter'
         });
     }
 

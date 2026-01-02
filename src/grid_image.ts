@@ -11,6 +11,7 @@ import {
   calculateTreeDrawPosition,
 } from './core/grid';
 import type { GridPosition } from './core/grid';
+import { applyCanvasFilter, type FilterName } from './core/filters';
 
 // Re-export for backwards compatibility
 export { SCALE, GRID_CONFIG as DEFAULT_CONFIG };
@@ -33,11 +34,12 @@ export interface GridOptions {
   trees: TreeConfig[];
   outputFilename: string;
   dataFilename?: string;
+  filter?: FilterName;
 }
 
 // --- Exported Grid Generation Function ---
 export async function generateGrid(options: GridOptions): Promise<Buffer> {
-  const { trees, outputFilename, dataFilename } = options;
+  const { trees, outputFilename, dataFilename, filter = 'none' } = options;
 
   // Determine grid size from tree placements
   let maxGridDim = 1;
@@ -108,6 +110,12 @@ export async function generateGrid(options: GridOptions): Promise<Buffer> {
     }
   }
 
+  // Apply filter if specified
+  if (filter && filter !== 'none') {
+    console.log(`Applying '${filter}' filter...`);
+    applyCanvasFilter(ctx, GRID_CONFIG.canvasWidth, GRID_CONFIG.canvasHeight, filter);
+  }
+
   const buffer = await canvas.encode('png');
   await writeFile(outputFilename, buffer);
   
@@ -135,7 +143,8 @@ async function main() {
   await generateGrid({
     trees: treePlacements,
     outputFilename: IMAGE_CONFIG.filename,
-    dataFilename: IMAGE_CONFIG.dataFilename
+    dataFilename: IMAGE_CONFIG.dataFilename,
+    filter: 'winter'
   });
 }
 

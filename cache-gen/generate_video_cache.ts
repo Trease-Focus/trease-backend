@@ -72,7 +72,7 @@ export class VideoGenerator {
                         const treePngPath = path.join(IMAGES_DIR, `${entityName}_${i}.png`);
                         const gridOutputPath = path.join(this.outputDir, `${entityName}_${i}.webm`);
                         
-                        await generateGridVideo(treePngPath, result.videoPath, gridOutputPath, TREE_SCALE);
+                        await generateGridVideo(treePngPath, result.videoPath, gridOutputPath, TREE_SCALE,"winter");
                         
                         // Delete the original non-grid video
                         if (existsSync(result.videoPath)) {
