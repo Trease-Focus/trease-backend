@@ -71,7 +71,7 @@ export const entities: Map<string, Entity> = new Map<string, Entity>([
         description: "A colorful maple tree.",
         creator: "Nethical",
         donate: "https://digipaws.life/donate",
-        variants: 50,
+        variants: 10,
         basePrice: 150,
         generate: new Maple()
     }],
