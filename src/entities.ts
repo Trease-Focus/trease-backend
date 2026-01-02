@@ -17,7 +17,7 @@ export const entities: Map<string, Entity> = new Map<string, Entity>([
         description: "A generic tree.",
         creator: "Nethical",
         donate: "https://digipaws.life/donate",
-        variants: 50,
+        variants: 4,
         basePrice: 100,
         generate: new Tree()
     }],
@@ -26,7 +26,7 @@ export const entities: Map<string, Entity> = new Map<string, Entity>([
         description: "A beautiful cherry blossom tree.",
         creator: "Nethical",
         donate: "https://digipaws.life/donate",
-        variants: 50,
+        variants: 5,
         basePrice: 150,
         generate: new Sakura()
     }],
@@ -35,7 +35,7 @@ export const entities: Map<string, Entity> = new Map<string, Entity>([
         description: "A bright sunflower.",
         creator: "Nethical",
         donate: "https://digipaws.life/donate",
-        variants: 50,
+        variants: 9,
         basePrice: 100,
         generate: new Sunflower()
     }],
@@ -44,7 +44,7 @@ export const entities: Map<string, Entity> = new Map<string, Entity>([
         description: "A tall cedar tree.",
         creator: "Nethical",
         donate: "https://digipaws.life/donate",
-        variants: 50,
+        variants: 8,
         basePrice: 120,
         generate: new Cedar()
     }],
@@ -53,7 +53,7 @@ export const entities: Map<string, Entity> = new Map<string, Entity>([
         description: "Fragrant lavender plant.",
         creator: "Nethical",
         donate: "https://digipaws.life/donate",
-        variants: 50,
+        variants: 7,
         basePrice: 100,
         generate: new Lavender()
     }],
@@ -62,7 +62,7 @@ export const entities: Map<string, Entity> = new Map<string, Entity>([
         description: "A tree with pink ball-shaped flowers.",
         creator: "Nethical",
         donate: "https://digipaws.life/donate",
-        variants: 50,
+        variants: 9,
         basePrice: 130,
         generate: new PinkBallsTree()
     }],
@@ -80,7 +80,7 @@ export const entities: Map<string, Entity> = new Map<string, Entity>([
         description: "A cascading wisteria vine.",
         creator: "Nethical",
         donate: "https://digipaws.life/donate",
-        variants: 50,
+        variants: 10,
         basePrice: 150,
         generate: new Wisteria()
     }],
@@ -89,7 +89,7 @@ export const entities: Map<string, Entity> = new Map<string, Entity>([
         description: "A graceful weeping willow tree.",
         creator: "Nethical",
         donate: "https://digipaws.life/donate",
-        variants: 50,
+        variants: 9,
         basePrice: 150,
         generate: new WeepingWillow()
     }],
