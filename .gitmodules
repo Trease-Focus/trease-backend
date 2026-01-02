@@ -1,3 +1,4 @@
 [submodule "trease-artwork"]
 	path = trease-artwork
 	url = https://github.com/Trease-Focus/trease-artwork
+	branch = main
