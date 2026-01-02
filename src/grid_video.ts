@@ -43,7 +43,7 @@ export async function generateGridVideo(
   treePngPath: string,
   treeWebmPath: string,
   outputPath: string,
-  treeScale: number = 0.5
+  treeScale: number = 1
 ): Promise<void> {
   console.log('Loading tree image for anchor calculation...');
   const anchorImage = await loadImage(treePngPath);
@@ -123,12 +123,11 @@ export async function generateGridVideo(
   console.log(`✅ Video generated: ${outputPath}`);
 }
 
-// --- Main Execution ---
 async function main() {
   const cedarPngPath = 'maple.png';
   const cedarWebmPath = 'maple.webm';
   const outputPath = 'maple_on_grid.webm';
-  const treeScale = 0.8; // Adjust as needed
+  const treeScale = 1; // Adjust as needed
 
   await generateGridVideo(cedarPngPath, cedarWebmPath, outputPath, treeScale);
 }

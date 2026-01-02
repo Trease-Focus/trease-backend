@@ -42,7 +42,7 @@ export class SingleGridGenerator {
             imagePath,
             gridX: 0,
             gridY: 0,
-            scale: 0.8
+            scale: 1
         };
 
         await generateGrid({

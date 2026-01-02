@@ -8,7 +8,7 @@ import { generateGridVideo } from '../src/grid_video';
 const BASE_SEED = '6969696969696969';
 const OUTPUT_DIR = path.join(__dirname, '..', 'cache', 'video');
 const IMAGES_DIR = path.join(__dirname, '..', 'cache', 'images');
-const TREE_SCALE = 0.8;
+const TREE_SCALE = 1;
 const NUM_VARIATIONS = 100;
 
 /**
