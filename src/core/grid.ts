@@ -13,17 +13,17 @@ export const GRID_CONFIG = {
 };
 
 export const COLORS = {
-  grass: {
-    top: '#9FD26A',
-    sideLight: '#90C85E',
-    sideDark: '#86BC57',
-    tuft: '#7FB351',
-    gridStroke: '#8EBF5A'
-  },
-  soil: {
-    sideLight: '#6F5448',
-    sideDark: '#5F463C',
-  }
+    grass: {
+        top: '#E8F0F8',
+        sideLight: '#D4E2ED',
+        sideDark: '#C5D6E3',
+        tuft: '#B8CCDB',
+        gridStroke: '#CDE0EC'
+    },
+    soil: {
+        sideLight: '#8B9298',
+        sideDark: '#6E757A',
+    }
 };
 
 export interface GridPosition {
@@ -176,6 +176,145 @@ export interface DrawIsoBlockOptions {
   gridY?: number;
 }
 
+/**
+ * Generate wavy points along an isometric edge for seamless tiling.
+ * The wave pattern is based on the edge position so adjacent tiles connect seamlessly.
+ */
+function generateWavyEdge(
+  startX: number, startY: number,
+  endX: number, endY: number,
+  waveAmplitude: number,
+  waveFrequency: number,
+  segments: number = 12
+): {x: number, y: number}[] {
+  const points: {x: number, y: number}[] = [];
+  
+  // Direction vector along the edge
+  const dx = endX - startX;
+  const dy = endY - startY;
+  const length = Math.sqrt(dx * dx + dy * dy);
+  
+  // Normalized direction
+  const dirX = dx / length;
+  const dirY = dy / length;
+  
+  // Perpendicular vector (pointing "down" in isometric view)
+  const perpX = -dirY;
+  const perpY = dirX;
+  
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    const baseX = startX + dx * t;
+    const baseY = startY + dy * t;
+    
+    // Use sine wave for smooth, loopable pattern
+    // Phase is based on absolute position along the edge for seamless tiling
+    const phase = t * Math.PI * 2 * waveFrequency;
+    const waveOffset = Math.sin(phase) * waveAmplitude;
+    
+    points.push({
+      x: baseX + perpX * waveOffset,
+      y: baseY + perpY * waveOffset
+    });
+  }
+  
+  return points;
+}
+
+// Shared wave parameters for consistent grass-soil transition
+const WAVE_AMPLITUDE = 3 * SCALE;
+const WAVE_FREQUENCY = 2; // Number of complete waves along the edge
+const WAVE_SEGMENTS = 16;
+
+/**
+ * Draw a polygon with a wavy bottom edge for grass-soil transition.
+ */
+function drawWavyGrassSide(
+  ctx: any,
+  topLeft: {x: number, y: number},
+  topRight: {x: number, y: number},
+  bottomRight: {x: number, y: number},
+  bottomLeft: {x: number, y: number},
+  color: string,
+  strokeColor?: string
+) {
+  // Generate wavy points for the bottom edge (from bottomLeft to bottomRight)
+  const wavyBottom = generateWavyEdge(
+    bottomLeft.x, bottomLeft.y,
+    bottomRight.x, bottomRight.y,
+    WAVE_AMPLITUDE,
+    WAVE_FREQUENCY,
+    WAVE_SEGMENTS
+  );
+  
+  ctx.beginPath();
+  ctx.moveTo(topLeft.x, topLeft.y);
+  ctx.lineTo(topRight.x, topRight.y);
+  
+  // Draw straight line down to start of wavy edge
+  ctx.lineTo(wavyBottom[wavyBottom.length - 1]!.x, wavyBottom[wavyBottom.length - 1]!.y);
+  
+  // Draw wavy bottom edge (reverse direction)
+  for (let i = wavyBottom.length - 2; i >= 0; i--) {
+    ctx.lineTo(wavyBottom[i]!.x, wavyBottom[i]!.y);
+  }
+  
+  // Close back to top
+  ctx.lineTo(topLeft.x, topLeft.y);
+  ctx.closePath();
+  
+  ctx.fillStyle = color;
+  ctx.fill();
+  
+  ctx.strokeStyle = strokeColor || color;
+  ctx.lineWidth = 1 * SCALE;
+  ctx.stroke();
+}
+
+/**
+ * Draw a soil side polygon with a wavy top edge that matches the grass bottom.
+ */
+function drawWavySoilSide(
+  ctx: any,
+  topLeft: {x: number, y: number},
+  topRight: {x: number, y: number},
+  bottomRight: {x: number, y: number},
+  bottomLeft: {x: number, y: number},
+  color: string,
+  strokeColor?: string
+) {
+  // Generate wavy points for the top edge (from topLeft to topRight)
+  // This must match exactly with the grass bottom edge
+  const wavyTop = generateWavyEdge(
+    topLeft.x, topLeft.y,
+    topRight.x, topRight.y,
+    WAVE_AMPLITUDE,
+    WAVE_FREQUENCY,
+    WAVE_SEGMENTS
+  );
+  
+  ctx.beginPath();
+  
+  // Start from first wavy point and draw wavy top edge
+  ctx.moveTo(wavyTop[0]!.x, wavyTop[0]!.y);
+  for (let i = 1; i < wavyTop.length; i++) {
+    ctx.lineTo(wavyTop[i]!.x, wavyTop[i]!.y);
+  }
+  
+  // Draw straight lines for right side, bottom, and left side
+  ctx.lineTo(bottomRight.x, bottomRight.y);
+  ctx.lineTo(bottomLeft.x, bottomLeft.y);
+  ctx.lineTo(wavyTop[0]!.x, wavyTop[0]!.y);
+  ctx.closePath();
+  
+  ctx.fillStyle = color;
+  ctx.fill();
+  
+  ctx.strokeStyle = strokeColor || color;
+  ctx.lineWidth = 1 * SCALE;
+  ctx.stroke();
+}
+
 export function drawIsoBlock(ctx: any, pos: GridPosition, options: DrawIsoBlockOptions = {}) {
   const { gridX, gridY, pixelX, pixelY } = pos;
   const { hasShadow = false, shadowWidth, drawTufts = false } = options;
@@ -188,37 +327,41 @@ export function drawIsoBlock(ctx: any, pos: GridPosition, options: DrawIsoBlockO
   const topPointY = pixelY - (h / 2);
   const soilY = topPointY + GRID_CONFIG.grassHeight;
 
-  // Right Face (Soil)
-  drawPoly(ctx, [
-    { x: pixelX, y: soilY + h },
-    { x: pixelX + w / 2, y: soilY + h / 2 },
-    { x: pixelX + w / 2, y: soilY + h / 2 + GRID_CONFIG.soilHeight },
-    { x: pixelX, y: soilY + h + GRID_CONFIG.soilHeight }
-  ], COLORS.soil.sideDark);
+    // Right Face (Soil) - with wavy top to match grass bottom
+    drawWavySoilSide(ctx,
+        { x: pixelX, y: soilY + h },
+        { x: pixelX + w / 2, y: soilY + h / 2 },
+        { x: pixelX + w / 2, y: soilY + h / 2 + GRID_CONFIG.soilHeight },
+        { x: pixelX, y: soilY + h + GRID_CONFIG.soilHeight },
+        COLORS.soil.sideDark
+    );
 
-  // Left Face (Soil)
-  drawPoly(ctx, [
-    { x: pixelX, y: soilY + h },
-    { x: pixelX - w / 2, y: soilY + h / 2 },
-    { x: pixelX - w / 2, y: soilY + h / 2 + GRID_CONFIG.soilHeight },
-    { x: pixelX, y: soilY + h + GRID_CONFIG.soilHeight }
-  ], COLORS.soil.sideLight);
+    // Left Face (Soil) - with wavy top to match grass bottom
+    drawWavySoilSide(ctx,
+        { x: pixelX - w / 2, y: soilY + h / 2 },
+        { x: pixelX, y: soilY + h },
+        { x: pixelX, y: soilY + h + GRID_CONFIG.soilHeight },
+        { x: pixelX - w / 2, y: soilY + h / 2 + GRID_CONFIG.soilHeight },
+        COLORS.soil.sideLight
+    );
 
-  // Right Face (Grass)
-  drawPoly(ctx, [
+  // Right Face (Grass) - with wavy bottom
+  drawWavyGrassSide(ctx,
     { x: pixelX, y: topPointY + h },
     { x: pixelX + w / 2, y: topPointY + h / 2 },
     { x: pixelX + w / 2, y: topPointY + h / 2 + GRID_CONFIG.grassHeight },
-    { x: pixelX, y: topPointY + h + GRID_CONFIG.grassHeight }
-  ], COLORS.grass.sideDark);
+    { x: pixelX, y: topPointY + h + GRID_CONFIG.grassHeight },
+    COLORS.grass.sideDark
+  );
 
-  // Left Face (Grass)
-  drawPoly(ctx, [
-    { x: pixelX, y: topPointY + h },
+  // Left Face (Grass) - with wavy bottom
+  drawWavyGrassSide(ctx,
     { x: pixelX - w / 2, y: topPointY + h / 2 },
+    { x: pixelX, y: topPointY + h },
+    { x: pixelX, y: topPointY + h + GRID_CONFIG.grassHeight },
     { x: pixelX - w / 2, y: topPointY + h / 2 + GRID_CONFIG.grassHeight },
-    { x: pixelX, y: topPointY + h + GRID_CONFIG.grassHeight }
-  ], COLORS.grass.sideLight);
+    COLORS.grass.sideLight
+  );
 
   // Top Face
   const topVerts = [
