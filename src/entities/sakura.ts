@@ -46,7 +46,6 @@ class Branch {
     ) { }
 }
 
-// --- GENERATION LOGIC ---
 
 function drawPetalShape(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, rotation: number) {
     ctx.save();
@@ -77,13 +76,11 @@ function generateSakura(
         start.y + Math.sin(rad) * length
     );
 
-    // Bounds check - stop growing if we go too far out
     const margin = 50 * scale;
     if (end.x < -margin || end.x > bounds.width + margin || end.y < -margin || end.y > bounds.height + margin) {
         depth = 0;
     }
 
-    // Curvy branches
     const mid = new Vector2((start.x + end.x) / 2, (start.y + end.y) / 2);
     const perp = (rand.next() - 0.5) * length * 0.4;
     const control = new Vector2(
@@ -103,7 +100,6 @@ function generateSakura(
         }
     }
 
-    // Only add blossoms on outer branches (Pinterest look)
     if (depth < 4) {
         const clusterSize = rand.nextInt(5, 12);
         for (let i = 0; i < clusterSize; i++) {
@@ -146,11 +142,10 @@ export class Sakura implements Generate {
         if(CONFIG.photoOnly){
             const currentGrowthDist = maxDist * 1.2; // Set to final growth state
 
-            // Simulate falling petals to match video end state
             for (let f = 0; f < totalFrames; f++) {
                 const t = f / totalFrames;
                 
-                // --- SAKURA SNOW SYSTEM ---
+                // --- SAKURA SNOW SYSTEM ---x
                 if (t > 0.4 && f % 5 === 0) { // Start dropping petals midway
                     const centerX = CONFIG.width / 2;
                     const centerY = CONFIG.height / 2;
@@ -207,7 +202,6 @@ export class Sakura implements Generate {
 
             renderBranch(tree);
 
-            // Render falling petals
             fallingPetals.forEach(p => {
                 if (!p.active) return;
                 ctx.fillStyle = p.color;
@@ -235,9 +229,7 @@ export class Sakura implements Generate {
             const t = f / totalFrames;
             const currentGrowthDist = t * maxDist * 1.2;
 
-            // Clear background with transparency
             ctx.clearRect(0, 0, CONFIG.width, CONFIG.height);
-            // Recursive draw function
             const renderBranch = (b: Branch) => {
                 if (currentGrowthDist < b.distFromRoot) return;
 
@@ -271,7 +263,6 @@ export class Sakura implements Generate {
 
             renderBranch(tree);
 
-            // --- SAKURA SNOW SYSTEM ---
             if (t > 0.4 && f % 5 === 0) { // Start dropping petals midway
                 const centerX = CONFIG.width / 2;
                 const centerY = CONFIG.height / 2;

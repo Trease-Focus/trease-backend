@@ -132,7 +132,6 @@ function drawOrganicPlant(ctx: CanvasRenderingContext2D, flowerImg: Image, insta
         points.push({ x: nextX, y: nextY, width });
     }
 
-    // --- DRAW STEM ---
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     const branchProgress = stemProgress * segments; 
@@ -162,9 +161,7 @@ function drawOrganicPlant(ctx: CanvasRenderingContext2D, flowerImg: Image, insta
         ctx.stroke();
     }
     
-    // --- DRAW LEAVES ---
     for (let i = 1; i <= segments; i++) {
-        // LEAF FIX: Only grow if stem branchProgress has actually reached this segment's index
         if (i > 5 && i < segments - 3 && i % 4 === 0) {
             if (branchProgress >= i) {
                 const point = points[i];
@@ -177,8 +174,6 @@ function drawOrganicPlant(ctx: CanvasRenderingContext2D, flowerImg: Image, insta
         }
     }
 
-    // --- DRAW HEAD ---
-    // HEAD FIX: Only grows once stemProgress is exactly 1 (fully rendered)
     if (stemProgress >= 1.0 && headProgress > 0) {
         const head = points[points.length - 1];
         if (!head) return;

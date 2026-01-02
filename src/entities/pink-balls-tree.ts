@@ -9,7 +9,6 @@ import type { ChildProcessWithoutNullStreams } from 'node:child_process';
 import { DEFAULT_CONFIG, type Config } from '../types/config';
 import type { GeneratorResult } from '../types/generator-result';
 import { getFFmpegArgs } from '../core/ffmpeg-args';
-// --- TYPES & MATH HELPERS ---
 
 class Vector2 {
     constructor(public x: number, public y: number) { }
@@ -58,7 +57,6 @@ interface Bounds {
     minX: number; maxX: number; minY: number; maxY: number;
 }
 
-// --- LOGIC ---
 
 const coerceIn = (val: number, min: number, max: number) => Math.max(min, Math.min(val, max));
 
@@ -101,7 +99,6 @@ export class PinkBallsTree implements Generate {
             0
         );
 
-        // --- AUTO-FIT LOGIC ---
         console.log("📐 Calculating bounds and scale...");
         const bounds = calculateBounds(fullTree);
         const treeWidth = bounds.maxX - bounds.minX;
@@ -157,7 +154,6 @@ export class PinkBallsTree implements Generate {
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
-            // DRAW TREE TRUNK (copied from render loop)
             ctx.strokeStyle = '#3E2723';
             for (const b of branches) {
                 ctx.beginPath();
@@ -177,7 +173,6 @@ export class PinkBallsTree implements Generate {
                 ctx.stroke();
             }
 
-            // DRAW LEAVES & FRUITS 
             for (const e of entities) {
                 const prevAlpha = ctx.globalAlpha;
                 ctx.globalAlpha = (e.opacity ?? 1);
@@ -231,7 +226,6 @@ export class PinkBallsTree implements Generate {
             // Clear Rect for TRANSPARENT background
             ctx.clearRect(0, 0, CONFIG.width, CONFIG.height);
 
-            // --- PREPARE DATA ---
             const branches: SimpleBranch[] = [];
             let entities: Entity[] = [];
 
@@ -244,15 +238,12 @@ export class PinkBallsTree implements Generate {
             // Sort all entities back-to-front (top/back first), fruits drawn last so they appear on top
             leaves.sort((a, b) => a.center.y - b.center.y);
             fruits.sort((a, b) => a.center.y - b.center.y);
-            // Fruits are always drawn on top, never culled
             entities = leaves.concat(fruits);
 
-            // --- DRAWING ---
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
             // DRAW TREE TRUNK
-            // Pass 1: Dark Outline
             ctx.strokeStyle = '#3E2723';
             for (const b of branches) {
                 ctx.beginPath();
@@ -342,7 +333,6 @@ function generateFullTree(
     depth: number,
     currentDist: number,
 ): Branch {
-    // 1. Calculate End Point (Unconstrained initially)
     const angleOffset = rand.nextFloat(-20, 20); // More twisty
     const radAngle = (angle + angleOffset) * (Math.PI / 180);
 
@@ -350,7 +340,6 @@ function generateFullTree(
     const endY = start.y + length * Math.sin(radAngle);
     const end = new Vector2(endX, endY);
 
-    // 2. Calculate Control Point (Curvature)
     const dx = end.x - start.x;
     const dy = end.y - start.y;
     const mid = new Vector2(start.x + dx * 0.5, start.y + dy * 0.5);
@@ -372,7 +361,6 @@ function generateFullTree(
     const children: Branch[] = [];
     const entities: Entity[] = [];
 
-    // 3. Branching Logic
     if (depth > 0) {
         const branchCount = rand.nextInt(2, 3); // 2 to 3 branches
         for (let i = 0; i < branchCount; i++) {
@@ -438,7 +426,6 @@ function generateFullTree(
                     attachmentPoint: attachmentPoint
                 });
             } else {
-                // Cherry blossom colors
                 const pinks = [
                     { r: 255, g: 182, b: 193 }, // Base Pink
                     { r: 255, g: 209, b: 230 }, // Lighter Pink
@@ -493,7 +480,6 @@ function getMaxDist(b: Branch): number {
     return max;
 }
 
-// --- FLATTENING WITH SCALING & ORGANIC TIMING ---
 function flattenTreeOrganic(
     b: Branch,
     branchList: SimpleBranch[],
@@ -503,14 +489,10 @@ function flattenTreeOrganic(
     offsetX: number,
     offsetY: number
 ) {
-    // 1. Transform Coordinates for Perfect Fit
     const tStart = new Vector2(b.start.x * scale + offsetX, b.start.y * scale + offsetY);
     const tEnd = new Vector2(b.end.x * scale + offsetX, b.end.y * scale + offsetY);
     const tControl = new Vector2(b.control.x * scale + offsetX, b.control.y * scale + offsetY);
 
-    // 2. Growth Logic based on Distance
-    // This branch starts growing when the "progress wave" hits its start distance
-    // It finishes growing when the wave hits its end distance
     const startDist = b.distFromRoot;
     const endDist = b.distFromRoot + b.length;
 
@@ -539,7 +521,6 @@ function flattenTreeOrganic(
                 new Vector2(curControlX, curControlY)
             ));
 
-            // 3. Entity Growth (Leaves/Fruits)
             // They start growing when the growth wave passes their specific attachment point
             b.entities.forEach(entity => {
                 if (progressDistance > entity.distFromRoot) {

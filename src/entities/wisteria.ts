@@ -38,10 +38,8 @@ export class Wisteria implements Generate {
     async generate(con: Context, onStream?:(process:ChildProcessWithoutNullStreams,videoStream:ChildProcessWithoutNullStreams['stdout']) => void, CONFIG: Config = DEFAULT_CONFIG): Promise<GeneratorResult> {
         console.log("Generating Weeping Willow with Assets");
 
-        // 1. LOAD ASSET (Specific path requested)
         let foliageImg: Image;
         try {
-             // Using the exact path snippet provided
              foliageImg = await loadImage("./assets/wisteria.png");
              console.log("Asset loaded successfully.");
         } catch (e) {
@@ -53,7 +51,6 @@ export class Wisteria implements Generate {
         const ctx = canvas.getContext('2d');
         const rand = new SeededRandom(CONFIG.seed);
         
-        // 2. GENERATE STRUCTURE
         const startPos = new Vector2(0, 0);
         const initialLength = 160; 
         const maxDepth = 8; 
@@ -68,7 +65,6 @@ export class Wisteria implements Generate {
             0
         );
 
-        // 3. AUTO-FIT
         const bounds = calculateBounds(fullTree);
         const treeWidth = bounds.maxX - bounds.minX;
         const treeHeight = bounds.maxY - bounds.minY;
@@ -84,7 +80,6 @@ export class Wisteria implements Generate {
 
         console.log(`   Tree Scale: ${finalScale.toFixed(3)}`);
 
-        // 4. RENDER
         if (CONFIG.photoOnly) {
             const maxDistance = getMaxDist(fullTree);
             const currentGrowthDist = maxDistance + 500; // Ensure everything is grown
@@ -164,13 +159,11 @@ export class Wisteria implements Generate {
 
         flattenTreeOrganic(tree, branches, entities, growthDist, scale, offX, offY);
 
-        // Sort images so lower ones draw on top (painter's algorithm approximation)
         entities.sort((a, b) => a.center.y - b.center.y);
 
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // --- DRAW WOOD ---
         ctx.strokeStyle = '#2d241b'; 
         for (const b of branches) {
             ctx.beginPath();
@@ -180,7 +173,6 @@ export class Wisteria implements Generate {
             ctx.stroke();
         }
 
-        // --- PASTE FOLIAGE IMAGES ---
         for (const e of entities) {
             const prevAlpha = ctx.globalAlpha;
             ctx.globalAlpha = (e.opacity ?? 1);
@@ -207,7 +199,6 @@ export class Wisteria implements Generate {
     }
 }
 
-// --- DATA STRUCTURES ---
 
 class Vector2 { constructor(public x: number, public y: number) { } }
 
@@ -237,7 +228,6 @@ interface Bounds { minX: number; maxX: number; minY: number; maxY: number; }
 const coerceIn = (val: number, min: number, max: number) => Math.max(min, Math.min(val, max));
 function smoothStep(t: number): number { return t * t * (3 - 2 * t); }
 
-// --- GENERATION LOGIC ---
 
 function generateWillowStructure(
     rand: SeededRandom,
@@ -245,9 +235,7 @@ function generateWillowStructure(
     depth: number, maxDepth: number, currentDist: number,
 ): Branch {
     
-    // --- 1. Structure Logic (from tree.ts) ---
     
-    // Calculate End Point
     const angleOffset = rand.nextFloat(-20, 20); 
     const radAngle = (angle + angleOffset) * (Math.PI / 180);
 
@@ -255,7 +243,6 @@ function generateWillowStructure(
     const endY = start.y + length * Math.sin(radAngle);
     const end = new Vector2(endX, endY);
 
-    // Calculate Control Point
     const dx = end.x - start.x;
     const dy = end.y - start.y;
     const mid = new Vector2(start.x + dx * 0.5, start.y + dy * 0.5);
@@ -270,15 +257,12 @@ function generateWillowStructure(
     }
     const control = new Vector2(mid.x + perpX, mid.y + perpY);
     
-    // Stroke Width (from bush.ts to keep it "very large")
     const strokeWidth = Math.max(1, Math.pow(depth, 1.4) * 2.5);
 
     const children: Branch[] = [];
     const entities: ImageEntity[] = [];
 
-    // Recursion (from tree.ts)
     if (depth > 0) {
-        // tree.ts uses 2 to 3 branches
         const branchCount = rand.nextInt(2, 3); 
         for (let i = 0; i < branchCount; i++) {
             const angleVariation = rand.nextFloat(-45, 45);
@@ -292,7 +276,6 @@ function generateWillowStructure(
         }
     }
 
-    // --- 2. Asset Placement (for wisteria.png) ---
   if (depth < 6 && rand.nextFloat(0, 1) > 0.9 && entities.length < 1) {
         // Attach only at the top of each main branch
         const attachX = start.x;
@@ -313,7 +296,6 @@ function generateWillowStructure(
     return new Branch(start, end, strokeWidth, control, length, currentDist, children, entities);
 }
 
-// --- UTILITIES ---
 
 function calculateBounds(b: Branch, currentBounds: Bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity }): Bounds {
     currentBounds.minX = Math.min(currentBounds.minX, b.start.x, b.end.x, b.control.x);
